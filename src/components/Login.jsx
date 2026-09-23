@@ -1,23 +1,25 @@
 import React, { useState } from 'react';
+import { setSession, loginWithApi } from 'educk-front/src/session.js';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // Simulacion de auth
-    const user = {
-      nombre: 'Maria Lopez',
-      rol: 'ESTUDIANTE',
-      email: email
-    };
     
-    localStorage.setItem('edutrack_user', JSON.stringify(user));
-    localStorage.setItem('edutrack_token', 'mock_token_12345');
-    
-    // Redirect to Shell (puerto 3000)
-    window.location.href = 'http://localhost:3000';
+    try {
+      const gatewayUrl = import.meta.env.VITE_API_GATEWAY_URL || 'http://localhost:8080/api/v1';
+      const data = await loginWithApi(email, password, gatewayUrl);
+      
+      setSession(data.user, data.token);
+      
+      const redirectUrl = import.meta.env.VITE_REDIRECT_URL || 'http://localhost:3000';
+      window.location.href = redirectUrl;
+    } catch (error) {
+      console.error('Login failed:', error);
+      alert('Authentication failed. Please check your credentials.');
+    }
   };
 
   return (
