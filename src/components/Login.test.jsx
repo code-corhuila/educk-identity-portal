@@ -32,7 +32,7 @@ describe('Login Component', () => {
 
   test('calls login endpoint and sets session on successful submit', async () => {
     // Setup successful mock response
-    const mockUser = { nombre: 'Test User', email: 'test@example.com' };
+    const mockUser = { name: 'Test User', email: 'test@example.com' };
     const mockToken = 'real_token_123';
     sessionModule.loginWithApi.mockResolvedValueOnce({ user: mockUser, token: mockToken });
     
