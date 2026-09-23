@@ -1,24 +1,33 @@
 import React, { useState } from 'react';
-import { setSession, loginWithApi } from 'educk-front/src/session.js';
+import { setSession, loginWithApi } from 'educk-front';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
     
+    setIsSubmitting(true);
     try {
-      const gatewayUrl = import.meta.env.VITE_API_GATEWAY_URL || 'http://localhost:8080/api/v1';
+      const gatewayUrl = import.meta.env.VITE_API_GATEWAY_URL;
+      const redirectUrl = import.meta.env.VITE_REDIRECT_URL;
+      
+      if (!gatewayUrl || !redirectUrl) {
+        throw new Error('System configuration error: Missing gateway or redirect URL');
+      }
+
       const data = await loginWithApi(email, password, gatewayUrl);
       
       setSession(data.user, data.token);
-      
-      const redirectUrl = import.meta.env.VITE_REDIRECT_URL || 'http://localhost:3000';
       window.location.href = redirectUrl;
     } catch (error) {
       console.error('Login failed:', error);
-      alert('Authentication failed. Please check your credentials.');
+      alert(`Authentication failed: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

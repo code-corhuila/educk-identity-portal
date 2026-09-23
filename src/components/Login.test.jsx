@@ -1,12 +1,14 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { describe, test, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
 import Login from './Login';
-import * as sessionModule from 'educk-front/src/session.js';
+import * as sessionModule from 'educk-front';
 
 // Mock the session module
-jest.mock('educk-front/src/session.js', () => ({
-  loginWithApi: jest.fn(),
-  setSession: jest.fn()
+vi.mock('educk-front', () => ({
+  loginWithApi: vi.fn(),
+  setSession: vi.fn()
 }));
 
 describe('Login Component', () => {
@@ -15,14 +17,17 @@ describe('Login Component', () => {
   beforeAll(() => {
     delete window.location;
     window.location = { href: '' };
+    vi.stubEnv('VITE_API_GATEWAY_URL', 'http://test-gateway');
+    vi.stubEnv('VITE_REDIRECT_URL', 'http://localhost:3000');
   });
   
   afterAll(() => {
     window.location = originalLocation;
+    vi.unstubAllEnvs();
   });
   
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('calls login endpoint and sets session on successful submit', async () => {
@@ -62,7 +67,7 @@ describe('Login Component', () => {
     sessionModule.loginWithApi.mockRejectedValueOnce(new Error('Auth failed'));
     
     // Mock window.alert
-    const alertMock = jest.spyOn(window, 'alert').mockImplementation(() => {});
+    const alertMock = vi.spyOn(window, 'alert').mockImplementation(() => {});
     
     render(<Login />);
     
@@ -73,7 +78,7 @@ describe('Login Component', () => {
     
     // Wait for the alert
     await waitFor(() => {
-      expect(alertMock).toHaveBeenCalledWith('Authentication failed. Please check your credentials.');
+      expect(alertMock).toHaveBeenCalledWith('Authentication failed: Auth failed');
     });
     
     expect(sessionModule.setSession).not.toHaveBeenCalled();
