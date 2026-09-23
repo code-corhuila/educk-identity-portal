@@ -34,7 +34,7 @@ export default function Login() {
   return (
     <div style={{ display: 'flex', width: '100%', height: '100vh', fontFamily: 'Inter, sans-serif' }}>
       
-      {/* Mitad Izquierda - Formulario */}
+      {/* Left Half - Form */}
       <div style={{ flex: 1, backgroundColor: '#ffffff', display: 'flex', flexDirection: 'column', padding: '60px' }}>
         
         <div style={{ marginBottom: '60px' }}>
@@ -106,7 +106,7 @@ export default function Login() {
         </div>
       </div>
 
-      {/* Mitad Derecha - Branding (Oculto en movil, visible en desktop) */}
+      {/* Right Half - Branding (Hidden on mobile, visible on desktop) */}
       <div style={{ 
           flex: 1, 
           backgroundColor: '#1E3A8A', 
@@ -118,7 +118,7 @@ export default function Login() {
           overflow: 'hidden'
         }}>
         
-        {/* Decoracion de gradiente */}
+        {/* Gradient decoration */}
         <div style={{
           position: 'absolute',
           width: '600px',
