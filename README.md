@@ -1,25 +1,19 @@
 # educk-identity-portal
 
-> identity bounded context: web UI (remote)
+Identity web remote for EduTrack. HU-003 provides the institutional login, an authenticated profile with role context, friendly credential errors and logout.
 
-Part of the **LMS Library** distributed system — team `lms-library`, Grupo 2.
-Governance and documentation live in [`library-docs`](https://github.com/code-corhuila/library-docs).
+## Local development
+
+Requires Node 22 LTS or 24.
+
+```bash
+npm install
+npm test
+npm run dev
+```
+
+The portal runs on `http://localhost:3001`. This slice uses a simulated identity response shaped like `identity-service.yaml`; HTTP integration remains outside this change. Access credentials remain in memory and are never rendered.
 
 ## Branching
 
-Three permanent branches. **None of them accepts a direct commit** — you enter through a child
-branch and leave through a Pull Request.
-
-```
-develop  <--PR--  feat/... fix/... chore/...
-qa       <--PR--  qa/...
-main     <--PR--  release/...  hotfix/...
-```
-
-Promotion happens **by re-application** (`git cherry-pick -x`), never by merging one permanent
-branch into another: `merge develop -> qa` and `merge qa -> main` do not exist in this model.
-
-`main` requires **1 approval from `ariel5253`**. On `develop` and `qa` the team sets its own review
-rule.
-
-Full policy: `00-governance/branching-policy.md` in `library-docs`.
+Changes enter `develop` through `feat/`, `fix/` or `chore/` Pull Requests. Permanent branches are never updated directly.
