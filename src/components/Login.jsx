@@ -5,11 +5,13 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleLogin = async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
     
+    setErrorMessage('');
     setIsSubmitting(true);
     try {
       const gatewayUrl = import.meta.env.VITE_API_GATEWAY_URL;
@@ -25,7 +27,7 @@ export default function Login() {
       window.location.href = redirectUrl;
     } catch (error) {
       console.error('Login failed:', error);
-      alert(`Authentication failed: ${error.message}`);
+      setErrorMessage('Authentication failed. Please check your credentials and try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -79,6 +81,18 @@ export default function Login() {
               />
             </div>
 
+            {errorMessage && (
+              <div style={{ 
+                padding: '12px', 
+                borderRadius: '8px', 
+                backgroundColor: '#FEF2F2', 
+                color: '#991B1B', 
+                fontSize: '14px',
+                border: '1px solid #FECACA'
+              }}>
+                {errorMessage}
+              </div>
+            )}
             <button 
               type="submit" 
               style={{

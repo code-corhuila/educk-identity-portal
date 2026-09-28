@@ -62,26 +62,58 @@ describe('Login Component', () => {
     expect(window.location.href).toContain('http://localhost:3000');
   });
 
-  test('shows alert on failed login', async () => {
-    // Setup failed mock response
+  test('shows error message in DOM on failed login', async () => {
     sessionModule.loginWithApi.mockRejectedValueOnce(new Error('Auth failed'));
-    
-    // Mock window.alert
-    const alertMock = vi.spyOn(window, 'alert').mockImplementation(() => {});
-    
+
     render(<Login />);
-    
-    // Submit form
+
     fireEvent.change(screen.getByPlaceholderText('maria.lopez@email.com'), { target: { value: 'bad@email.com' } });
-    fireEvent.change(screen.getByPlaceholderText('••••••••••••'), { target: { value: 'wrongpass' } });
+    fireEvent.change(document.querySelector('input[type="password"]'), { target: { value: 'wrongpass' } });
     fireEvent.click(screen.getByText('Ingresar a EduTrack'));
-    
-    // Wait for the alert
+
     await waitFor(() => {
-      expect(alertMock).toHaveBeenCalledWith('Authentication failed: Auth failed');
+      expect(screen.getByText('Authentication failed. Please check your credentials and try again.')).toBeInTheDocument();
     });
-    
+
     expect(sessionModule.setSession).not.toHaveBeenCalled();
+  });
+
+  test('shows error message when gateway or redirect URL is missing', async () => {
+    vi.stubEnv('VITE_API_GATEWAY_URL', '');
+    vi.stubEnv('VITE_REDIRECT_URL', '');
+
+    render(<Login />);
+
+    fireEvent.change(screen.getByPlaceholderText('maria.lopez@email.com'), { target: { value: 'test@example.com' } });
+    fireEvent.change(document.querySelector('input[type="password"]'), { target: { value: 'password123' } });
+    fireEvent.click(screen.getByText('Ingresar a EduTrack'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Authentication failed. Please check your credentials and try again.')).toBeInTheDocument();
+    });
+
+    expect(sessionModule.loginWithApi).not.toHaveBeenCalled();
+
+    vi.stubEnv('VITE_API_GATEWAY_URL', 'http://test-gateway');
+    vi.stubEnv('VITE_REDIRECT_URL', 'http://localhost:3000');
+  });
+
+  test('does not call native alert on auth error', async () => {
+    sessionModule.loginWithApi.mockRejectedValueOnce(new Error('Auth failed'));
+
+    const alertMock = vi.spyOn(window, 'alert').mockImplementation(() => {});
+
+    render(<Login />);
+
+    fireEvent.change(screen.getByPlaceholderText('maria.lopez@email.com'), { target: { value: 'bad@email.com' } });
+    fireEvent.change(document.querySelector('input[type="password"]'), { target: { value: 'wrongpass' } });
+    fireEvent.click(screen.getByText('Ingresar a EduTrack'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Authentication failed. Please check your credentials and try again.')).toBeInTheDocument();
+    });
+
+    expect(alertMock).not.toHaveBeenCalled();
     alertMock.mockRestore();
   });
 });
