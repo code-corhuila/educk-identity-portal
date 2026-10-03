@@ -33,29 +33,3 @@ export function adaptSessionFromApi(rawResponse) {
   return { accessToken, tokenType, expiresIn, user: { ...user } };
 }
 
-export async function loginWithApi(email, password, gatewayUrl) {
-  const errorMsg = getLoginValidationError({ email, password });
-  if (errorMsg) {
-    throw new Error(errorMsg);
-  }
-
-  const response = await fetch(`${gatewayUrl}/api/v1/auth/login`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ email, password })
-  });
-
-  if (!response.ok) {
-    throw new Error('Authentication failed');
-  }
-
-  const rawResponse = await response.json();
-  const sessionData = adaptSessionFromApi(rawResponse);
-  
-  return {
-    user: sessionData.user,
-    token: sessionData.accessToken
-  };
-}
