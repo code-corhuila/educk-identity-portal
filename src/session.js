@@ -13,12 +13,7 @@ export function getLoginValidationError({ email = '', password = '' }) {
   return '';
 }
 
-export function inferMockRole(email) {
-  const prefix = email.trim().toLowerCase().split('@')[0];
-  if (prefix.startsWith('directivo')) return 'DIRECTIVO';
-  if (prefix.startsWith('docente')) return 'DOCENTE';
-  return 'ACUDIENTE';
-}
+
 
 export function getRolePresentation(role) {
   if (!SUPPORTED_ROLES.includes(role)) throw new Error(`Unsupported identity role: ${role}`);
@@ -38,19 +33,29 @@ export function adaptSessionFromApi(rawResponse) {
   return { accessToken, tokenType, expiresIn, user: { ...user } };
 }
 
-export function buildMockLoginResponse(email) {
-  const role = inferMockRole(email);
+export async function loginWithApi(email, password, gatewayUrl) {
+  const errorMsg = getLoginValidationError({ email, password });
+  if (errorMsg) {
+    throw new Error(errorMsg);
+  }
+
+  const response = await fetch(`${gatewayUrl}/api/v1/auth/login`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email, password })
+  });
+
+  if (!response.ok) {
+    throw new Error('Authentication failed');
+  }
+
+  const rawResponse = await response.json();
+  const sessionData = adaptSessionFromApi(rawResponse);
+  
   return {
-    accessToken: globalThis.crypto?.randomUUID?.() ?? `mock-${Date.now()}`,
-    tokenType: 'Bearer',
-    expiresIn: 3600,
-    user: {
-      id: '00000000-0000-4000-8000-000000000301',
-      email: email.trim().toLowerCase(),
-      role,
-      firstName: role === 'DOCENTE' ? 'María' : role === 'DIRECTIVO' ? 'Andrea' : 'Camila',
-      lastName: 'González',
-      status: 'ACTIVE'
-    }
+    user: sessionData.user,
+    token: sessionData.accessToken
   };
 }

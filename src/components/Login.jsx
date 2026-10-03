@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { setSession, loginWithApi } from 'educk-front';
+import { setSession } from 'educk-front';
+import { loginWithApi } from '../session';
 
 export default function Login() {
   const [email, setEmail] = useState('');
