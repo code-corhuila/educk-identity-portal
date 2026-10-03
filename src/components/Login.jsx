@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { setSession } from 'educk-front';
-import { loginWithApi } from '../session';
+import { setSession, loginWithApi } from 'educk-front';
+import { getLoginValidationError, adaptSessionFromApi } from '../session';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -13,6 +13,13 @@ export default function Login() {
     if (isSubmitting) return;
     
     setErrorMessage('');
+    
+    const validationError = getLoginValidationError({ email, password });
+    if (validationError) {
+      setErrorMessage(validationError);
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const gatewayUrl = import.meta.env.VITE_API_GATEWAY_URL;
@@ -22,13 +29,21 @@ export default function Login() {
         throw new Error('System configuration error: Missing gateway or redirect URL');
       }
 
-      const data = await loginWithApi(email, password, gatewayUrl);
+      // Delegate the actual HTTP call to the shared educk-front client
+      const rawData = await loginWithApi(email, password, gatewayUrl);
       
-      setSession(data.user, data.token);
+      // Adapt the data (throws if invalid)
+      const sessionData = adaptSessionFromApi(rawData);
+      
+      // Store all session metadata, including expiresIn and tokenType
+      setSession(sessionData.accessToken, sessionData.user, sessionData.expiresIn, sessionData.tokenType);
+      
       window.location.href = redirectUrl;
     } catch (error) {
       console.error('Login failed:', error);
-      setErrorMessage('Authentication failed. Please check your credentials and try again.');
+      // Use the structured error message from the backend if available
+      const serverMessage = error.body?.message || error.message || 'Authentication failed. Please check your credentials and try again.';
+      setErrorMessage(serverMessage);
     } finally {
       setIsSubmitting(false);
     }
