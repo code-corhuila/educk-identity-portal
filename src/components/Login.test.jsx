@@ -3,12 +3,17 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { describe, test, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
 import Login from './Login';
-import * as sessionModule from 'educk-front';
+import * as shellModule from 'educk-front';
+import * as sessionModule from '../session';
+
+// Mock the shell module
+vi.mock('educk-front', () => ({
+  setSession: vi.fn()
+}));
 
 // Mock the session module
-vi.mock('educk-front', () => ({
-  loginWithApi: vi.fn(),
-  setSession: vi.fn()
+vi.mock('../session', () => ({
+  loginWithApi: vi.fn()
 }));
 
 describe('Login Component', () => {
@@ -58,7 +63,7 @@ describe('Login Component', () => {
       );
     });
     
-    expect(sessionModule.setSession).toHaveBeenCalledWith(mockUser, mockToken);
+    expect(shellModule.setSession).toHaveBeenCalledWith(mockUser, mockToken);
     expect(window.location.href).toContain('http://localhost:3000');
   });
 
@@ -75,7 +80,7 @@ describe('Login Component', () => {
       expect(screen.getByText('Authentication failed. Please check your credentials and try again.')).toBeInTheDocument();
     });
 
-    expect(sessionModule.setSession).not.toHaveBeenCalled();
+    expect(shellModule.setSession).not.toHaveBeenCalled();
   });
 
   test('shows error message when gateway or redirect URL is missing', async () => {

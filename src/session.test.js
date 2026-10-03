@@ -1,16 +1,12 @@
 import { test, expect } from 'vitest';
-import { adaptSessionFromApi, buildMockLoginResponse, getLoginValidationError, getRolePresentation, inferMockRole } from './session.js';
+import { adaptSessionFromApi, getLoginValidationError, getRolePresentation } from './session.js';
 
 test('validates malformed credentials with a friendly message', () => {
   expect(getLoginValidationError({ email: 'invalid', password: 'short' })).toMatch(/Correo o contraseña/);
   expect(getLoginValidationError({ email: 'docente@edutrack.edu.co', password: 'valid-pass' })).toBe('');
 });
 
-test('infers the three supported mock roles', () => {
-  expect(inferMockRole('directivo@edutrack.edu.co')).toBe('DIRECTIVO');
-  expect(inferMockRole('docente@edutrack.edu.co')).toBe('DOCENTE');
-  expect(inferMockRole('familia@example.com')).toBe('ACUDIENTE');
-});
+
 
 test('maps each role to its profile presentation', () => {
   expect(getRolePresentation('DIRECTIVO').label).toBe('Directivo');
@@ -23,7 +19,19 @@ test('rejects roles outside the institutional set', () => {
 });
 
 test('adapts the documented API response without mutating it', () => {
-  const raw = buildMockLoginResponse('docente@edutrack.edu.co');
+  const raw = {
+    accessToken: 'mocked-token',
+    tokenType: 'Bearer',
+    expiresIn: 3600,
+    user: {
+      id: '001',
+      email: 'docente@edutrack.edu.co',
+      role: 'DOCENTE',
+      firstName: 'María',
+      lastName: 'González',
+      status: 'ACTIVE'
+    }
+  };
   const session = adaptSessionFromApi(raw);
   expect(session.user.email).toBe('docente@edutrack.edu.co');
   expect(session.user.role).toBe('DOCENTE');
