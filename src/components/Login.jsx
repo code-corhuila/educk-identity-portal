@@ -11,9 +11,9 @@ export default function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
-    
+
     setErrorMessage('');
-    
+
     const validationError = getLoginValidationError({ email, password });
     if (validationError) {
       setErrorMessage(validationError);
@@ -24,20 +24,20 @@ export default function Login() {
     try {
       const gatewayUrl = import.meta.env.VITE_API_GATEWAY_URL;
       const redirectUrl = import.meta.env.VITE_REDIRECT_URL;
-      
+
       if (!gatewayUrl || !redirectUrl) {
         throw new Error('System configuration error: Missing gateway or redirect URL');
       }
 
       // Delegate the actual HTTP call to the shared educk-front client
       const rawData = await loginWithApi(email, password, gatewayUrl);
-      
+
       // Adapt the data (throws if invalid)
       const sessionData = adaptSessionFromApi(rawData);
-      
+
       // Store all session metadata, including expiresIn and tokenType
       setSession(sessionData.accessToken, sessionData.user, sessionData.expiresIn, sessionData.tokenType);
-      
+
       window.location.href = redirectUrl;
     } catch (error) {
       console.error('Login failed:', error);
@@ -50,13 +50,13 @@ export default function Login() {
   };
 
   return (
-    <div style={{ display: 'flex', width: '100%', height: '100vh', fontFamily: 'Inter, sans-serif' }}>
-      
+    <div style={{ display: 'flex', width: '100%', height: '100vh', fontFamily: 'var(--font-family-sans)' }}>
+
       {/* Left Half - Form */}
-      <div style={{ flex: 1, backgroundColor: '#ffffff', display: 'flex', flexDirection: 'column', padding: '60px' }}>
-        
+      <div style={{ flex: 1, backgroundColor: 'var(--color-text-inverse)', display: 'flex', flexDirection: 'column', padding: '60px' }}>
+
         <div style={{ marginBottom: '60px' }}>
-          <span style={{ fontSize: 24, fontWeight: 800, color: '#0F172A', letterSpacing: '-0.5px' }}>
+          <span style={{ fontSize: 24, fontWeight: 800, color: 'var(--color-sidebar-bg)', letterSpacing: '-0.5px' }}>
             Edu<span style={{ color: '#00C4A7' }}>Track</span>
           </span>
         </div>
@@ -65,58 +65,58 @@ export default function Login() {
           <h2 style={{ fontSize: '14px', color: '#00C4A7', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>
             PORTAL PARA FAMILIAS
           </h2>
-          <h1 style={{ fontSize: '42px', color: '#0F172A', fontWeight: 800, lineHeight: 1.1, marginBottom: '24px', letterSpacing: '-1px' }}>
+          <h1 style={{ fontSize: '42px', color: 'var(--color-sidebar-bg)', fontWeight: 800, lineHeight: 1.1, marginBottom: '24px', letterSpacing: '-1px' }}>
             Todo su progreso,<br/>en un solo lugar.
           </h1>
-          <p style={{ color: '#64748B', fontSize: '16px', marginBottom: '40px', lineHeight: 1.5 }}>
+          <p style={{ color: 'var(--color-text-secondary)', fontSize: '16px', marginBottom: '40px', lineHeight: 1.5 }}>
             Calificaciones, asistencia y comunicación escolar en tiempo casi real.
           </p>
 
           <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label style={{ fontSize: '14px', fontWeight: 600, color: '#0F172A' }}>Correo electrónico</label>
-              <input 
+              <label style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-sidebar-bg)' }}>Correo electrónico</label>
+              <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="maria.lopez@email.com"
                 required
-                style={{ padding: '14px', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '16px', color: '#0F172A', outline: 'none' }}
+                style={{ padding: '14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '16px', color: 'var(--color-sidebar-bg)', outline: 'none' }}
               />
             </div>
-            
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label style={{ fontSize: '14px', fontWeight: 600, color: '#0F172A' }}>Contraseña</label>
-              <input 
+              <label style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-sidebar-bg)' }}>Contraseña</label>
+              <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••••••"
                 required
-                style={{ padding: '14px', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '16px', color: '#0F172A', outline: 'none' }}
+                style={{ padding: '14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '16px', color: 'var(--color-sidebar-bg)', outline: 'none' }}
               />
             </div>
 
             {errorMessage && (
-              <div style={{ 
-                padding: '12px', 
-                borderRadius: '8px', 
-                backgroundColor: '#FEF2F2', 
-                color: '#991B1B', 
+              <div style={{
+                padding: '12px',
+                borderRadius: '8px',
+                backgroundColor: 'color-mix(in srgb, var(--color-error) 8%, white)',
+                color: 'color-mix(in srgb, var(--color-error) 60%, black)',
                 fontSize: '14px',
-                border: '1px solid #FECACA'
+                border: '1px solid color-mix(in srgb, var(--color-error) 30%, white)'
               }}>
                 {errorMessage}
               </div>
             )}
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               style={{
-                background: '#1E3A8A', 
-                color: '#ffffff', 
-                padding: '16px', 
-                borderRadius: '8px', 
-                fontWeight: 600, 
+                background: 'var(--color-primary-900)',
+                color: 'var(--color-text-inverse)',
+                padding: '16px',
+                borderRadius: '8px',
+                fontWeight: 600,
                 fontSize: '16px',
                 border: 'none',
                 cursor: 'pointer',
@@ -127,27 +127,27 @@ export default function Login() {
           </form>
 
           <div style={{ textAlign: 'center', marginTop: '20px' }}>
-            <a href="#" style={{ color: '#1E3A8A', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>¿Olvidaste tu contraseña?</a>
+            <a href="#" style={{ color: 'var(--color-primary-900)', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>¿Olvidaste tu contraseña?</a>
           </div>
-          
-          <div style={{ textAlign: 'center', marginTop: '60px', color: '#94A3B8', fontSize: '12px' }}>
+
+          <div style={{ textAlign: 'center', marginTop: '60px', color: 'var(--color-sidebar-text)', fontSize: '12px' }}>
             🔒 Conexión segura · Tus datos están protegidos
           </div>
         </div>
       </div>
 
       {/* Right Half - Branding (Hidden on mobile, visible on desktop) */}
-      <div style={{ 
-          flex: 1, 
-          backgroundColor: '#1E3A8A', 
-          display: 'flex', 
+      <div style={{
+          flex: 1,
+          backgroundColor: 'var(--color-primary-900)',
+          display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center', 
+          alignItems: 'center',
           justifyContent: 'center',
           position: 'relative',
           overflow: 'hidden'
         }}>
-        
+
         {/* Gradient decoration */}
         <div style={{
           position: 'absolute',
@@ -157,9 +157,9 @@ export default function Login() {
           background: 'linear-gradient(135deg, #00C4A7 0%, #29B6F6 100%)',
           boxShadow: '0 0 100px rgba(0,0,0,0.1)'
         }} />
-        
+
         <div style={{ position: 'relative', zIndex: 10, textAlign: 'center', padding: '0 40px' }}>
-          <h2 style={{ color: '#ffffff', fontSize: '48px', fontWeight: 800, lineHeight: 1.2, letterSpacing: '-1px' }}>
+          <h2 style={{ color: 'var(--color-text-inverse)', fontSize: '48px', fontWeight: 800, lineHeight: 1.2, letterSpacing: '-1px' }}>
             Acompaña su aprendizaje<br/>sin perderte nada.
           </h2>
         </div>
