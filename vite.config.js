@@ -6,10 +6,5 @@ export default defineConfig({
   server: {
     port: 3001,
     host: true
-  },
-  build: {
-    rollupOptions: {
-      external: ['educk-front']
-    }
   }
 });
