@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './Login.css';
 import { setSession, loginWithApi } from 'educk-front';
 import { getLoginValidationError, adaptSessionFromApi } from '../session';
 
@@ -50,12 +51,12 @@ export default function Login() {
   };
 
   return (
-    <div style={{ display: 'flex', width: '100%', height: '100vh', fontFamily: 'Inter, sans-serif' }}>
+    <div className="login-layout">
       
       {/* Left Half - Form */}
-      <div style={{ flex: 1, backgroundColor: '#ffffff', display: 'flex', flexDirection: 'column', padding: '60px' }}>
+      <div className="login-form-panel">
         
-        <div style={{ marginBottom: '60px' }}>
+        <div className="login-brand">
           <span style={{ fontSize: 24, fontWeight: 800, color: '#0F172A', letterSpacing: '-0.5px' }}>
             Edu<span style={{ color: '#00C4A7' }}>Track</span>
           </span>
@@ -74,9 +75,11 @@ export default function Login() {
 
           <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label style={{ fontSize: '14px', fontWeight: 600, color: '#0F172A' }}>Correo electrónico</label>
+              <label htmlFor="login-email" style={{ fontSize: '14px', fontWeight: 600, color: '#0F172A' }}>Correo electrónico</label>
               <input 
                 type="email"
+                id="login-email"
+                autoComplete="username"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="maria.lopez@email.com"
@@ -86,9 +89,11 @@ export default function Login() {
             </div>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label style={{ fontSize: '14px', fontWeight: 600, color: '#0F172A' }}>Contraseña</label>
+              <label htmlFor="login-password" style={{ fontSize: '14px', fontWeight: 600, color: '#0F172A' }}>Contraseña</label>
               <input 
                 type="password"
+                id="login-password"
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••••••"
@@ -98,7 +103,7 @@ export default function Login() {
             </div>
 
             {errorMessage && (
-              <div style={{ 
+              <div role="alert" style={{
                 padding: '12px', 
                 borderRadius: '8px', 
                 backgroundColor: '#FEF2F2', 
@@ -111,6 +116,8 @@ export default function Login() {
             )}
             <button 
               type="submit" 
+              disabled={isSubmitting}
+              aria-busy={isSubmitting}
               style={{
                 background: '#1E3A8A', 
                 color: '#ffffff', 
@@ -137,7 +144,7 @@ export default function Login() {
       </div>
 
       {/* Right Half - Branding (Hidden on mobile, visible on desktop) */}
-      <div style={{ 
+      <div className="login-brand-panel" style={{
           flex: 1, 
           backgroundColor: '#1E3A8A', 
           display: 'flex', 
