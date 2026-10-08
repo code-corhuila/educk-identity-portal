@@ -57,12 +57,12 @@ export default function Login() {
 
         <div style={{ marginBottom: '60px' }}>
           <span style={{ fontSize: 24, fontWeight: 800, color: 'var(--color-sidebar-bg)', letterSpacing: '-0.5px' }}>
-            Edu<span style={{ color: '#00C4A7' }}>Track</span>
+            Edu<span style={{ color: 'var(--color-primary-500)' }}>Track</span>
           </span>
         </div>
 
         <div style={{ maxWidth: '400px', width: '100%', margin: '0 auto', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          <h2 style={{ fontSize: '14px', color: '#00C4A7', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>
+          <h2 style={{ fontSize: '14px', color: 'var(--color-primary-500)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>
             PORTAL PARA FAMILIAS
           </h2>
           <h1 style={{ fontSize: '42px', color: 'var(--color-sidebar-bg)', fontWeight: 800, lineHeight: 1.1, marginBottom: '24px', letterSpacing: '-1px' }}>
@@ -154,7 +154,7 @@ export default function Login() {
           width: '600px',
           height: '600px',
           borderRadius: '50%',
-          background: 'linear-gradient(135deg, #00C4A7 0%, #29B6F6 100%)',
+          background: 'linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-secondary-500) 100%)',
           boxShadow: '0 0 100px rgba(0,0,0,0.1)'
         }} />
 
