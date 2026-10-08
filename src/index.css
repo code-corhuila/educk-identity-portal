@@ -1,5 +1,7 @@
+@import './design-tokens.css';
+
 body {
   margin: 0;
-  font-family: 'Inter', sans-serif;
-  background-color: #f8fafc;
+  font-family: var(--font-family-sans);
+  background-color: var(--color-bg-page);
 }
