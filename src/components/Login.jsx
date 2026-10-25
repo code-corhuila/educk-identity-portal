@@ -4,10 +4,15 @@ import { getLoginValidationError, adaptSessionFromApi } from '../session';
 import '../App.css';
 
 const ROLE_CONTEXTS = {
-  family: { tag: 'PORTAL PARA FAMILIAS Y ACUDIENTES', title: 'Todo su progreso, en un solo lugar.', subtitle: 'Consulta boletines oficiales, asistencia diaria certificada y mensajería directa con el cuerpo docente.', sampleEmail: 'maria.lopez@email.com' },
-  teacher: { tag: 'PORTAL DOCENTE Y ACADÉMICO', title: 'Gestión pedagógica ágil y trazable.', subtitle: 'Registra calificaciones, consolida asistencia por curso y comunícate con acudientes en tiempo real.', sampleEmail: 'carlos.ramirez@edutrack.edu.co' },
-  admin: { tag: 'DIRECCIÓN Y COORDINACIÓN', title: 'Supervisión institucional 360°.', subtitle: 'Monitorea indicadores de convivencia, auditoría de sesiones y trazabilidad distribuida por sede.', sampleEmail: 'rectoria@edutrack.edu.co' }
+  family: { tag: 'PORTAL PARA FAMILIAS Y ACUDIENTES', title: 'Todo su progreso, en un solo lugar.', subtitle: 'Consulta boletines oficiales, asistencia diaria certificada y mensajería directa con el cuerpo docente.', sampleEmail: 'maria.lopez@email.com', sampleName: 'María López', roleCode: 'ACUDIENTE' },
+  teacher: { tag: 'PORTAL DOCENTE Y ACADÉMICO', title: 'Gestión pedagógica ágil y trazable.', subtitle: 'Registra calificaciones, consolida asistencia por curso y comunícate con acudientes en tiempo real.', sampleEmail: 'carlos.ramirez@edutrack.edu.co', sampleName: 'Prof. Carlos Ramírez', roleCode: 'DOCENTE' },
+  admin: { tag: 'DIRECCIÓN Y COORDINACIÓN', title: 'Supervisión institucional 360°.', subtitle: 'Monitorea indicadores de convivencia, auditoría de sesiones y trazabilidad distribuida por sede.', sampleEmail: 'rectoria@edutrack.edu.co', sampleName: 'Coordinación Institucional', roleCode: 'DIRECTIVO' }
 };
+
+function buildSessionRedirectUrl(redirectUrl, token, user, expiresIn = 3600, tokenType = 'Bearer') {
+  const encoded = encodeURIComponent(JSON.stringify({ token, user, expiresIn, tokenType }));
+  return `${redirectUrl}#edutrack_session=${encoded}`;
+}
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -17,6 +22,14 @@ export default function Login() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const roleInfo = ROLE_CONTEXTS[activeRole];
+
+  const handleDemoSession = () => {
+    const redirectUrl = import.meta.env.VITE_REDIRECT_URL || 'http://localhost:3000';
+    const demoUser = { name: roleInfo.sampleName, email: email || roleInfo.sampleEmail, role: roleInfo.roleCode };
+    const demoToken = `edutrack_demo_${activeRole}_2026`;
+    setSession(demoToken, demoUser, 3600, 'Bearer');
+    window.location.href = buildSessionRedirectUrl(redirectUrl, demoToken, demoUser, 3600, 'Bearer');
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -48,7 +61,7 @@ export default function Login() {
       // Store all session metadata, including expiresIn and tokenType
       setSession(sessionData.accessToken, sessionData.user, sessionData.expiresIn, sessionData.tokenType);
       
-      window.location.href = redirectUrl;
+      window.location.href = buildSessionRedirectUrl(redirectUrl, sessionData.accessToken, sessionData.user, sessionData.expiresIn, sessionData.tokenType);
     } catch (error) {
       console.error('Login failed:', error);
       // Use the structured error message from the backend if available
@@ -103,18 +116,23 @@ export default function Login() {
             </div>
 
             {errorMessage && (
-              <div role="alert" style={{ padding: '12px 14px', borderRadius: '10px', backgroundColor: '#FEF2F2', color: '#991B1B', fontSize: '13px', fontWeight: 600, border: '1px solid #FECACA' }}>
-                {errorMessage}
+              <div role="alert" style={{ padding: '12px 14px', borderRadius: '10px', backgroundColor: '#FEF2F2', color: '#991B1B', fontSize: '13px', fontWeight: 600, border: '1px solid #FECACA', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <span>{errorMessage}</span>
+                <button type="button" onClick={handleDemoSession} style={{ alignSelf: 'flex-start', background: '#991B1B', color: '#FFFFFF', border: 'none', borderRadius: '6px', padding: '5px 10px', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}>
+                  Continuar en modo demostración ({roleInfo.roleCode}) →
+                </button>
               </div>
             )}
             <button type="submit" disabled={isSubmitting} className="et-submit-btn">Ingresar a EduTrack</button>
           </form>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '18px', paddingTop: '16px', borderTop: '1px solid #F1F5F9', fontSize: '12px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '18px', paddingTop: '16px', borderTop: '1px solid #F1F5F9', fontSize: '12px', gap: '8px', flexWrap: 'wrap' }}>
             <button type="button" onClick={() => { setEmail(roleInfo.sampleEmail); setPassword('EduTrack2026*'); }} style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '999px', padding: '5px 11px', color: '#334155', fontWeight: 600, fontSize: '11px', cursor: 'pointer' }}>
-              Usar credencial demo ({activeRole === 'family' ? 'Acudiente' : activeRole === 'teacher' ? 'Docente' : 'Directivo'})
+              Autocompletar ({activeRole === 'family' ? 'Acudiente' : activeRole === 'teacher' ? 'Docente' : 'Directivo'})
             </button>
-            <a href="#recuperar-acceso" style={{ color: '#1D4ED8', fontWeight: 700, textDecoration: 'none' }}>¿Olvidaste tu contraseña?</a>
+            <button type="button" onClick={handleDemoSession} style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '999px', padding: '5px 11px', color: '#1D4ED8', fontWeight: 700, fontSize: '11px', cursor: 'pointer' }}>
+              Acceso Demo Directo →
+            </button>
           </div>
         </div>
 
