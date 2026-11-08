@@ -8,7 +8,6 @@ import * as sessionModule from '../session';
 
 // Mock the shell module
 vi.mock('educk-front', () => ({
-  setSession: vi.fn(),
   loginWithApi: vi.fn()
 }));
 
@@ -20,61 +19,94 @@ vi.mock('../session', () => ({
 
 describe('Login Component', () => {
   const originalLocation = window.location;
-  
+  const originalParentDescriptor = Object.getOwnPropertyDescriptor(window, 'parent');
+  let replaceMock;
+
   beforeAll(() => {
     delete window.location;
-    window.location = { href: '' };
+    replaceMock = vi.fn();
+    window.location = { href: '', replace: replaceMock };
     vi.stubEnv('VITE_API_GATEWAY_URL', 'http://test-gateway');
     vi.stubEnv('VITE_REDIRECT_URL', 'http://localhost:3000');
   });
-  
+
   afterAll(() => {
     window.location = originalLocation;
+    if (originalParentDescriptor) {
+      Object.defineProperty(window, 'parent', originalParentDescriptor);
+    }
     vi.unstubAllEnvs();
   });
-  
+
   beforeEach(() => {
     vi.clearAllMocks();
+    Object.defineProperty(window, 'parent', { value: window, configurable: true });
   });
 
-  test('calls login endpoint and sets session on successful submit', async () => {
-    // Setup successful mock response
-    const mockUser = { name: 'Test User', email: 'test@example.com' };
+  test('posts session to shell parent window without placing tokens in URLs when embedded', async () => {
+    const postMessageMock = vi.fn();
+    Object.defineProperty(window, 'parent', { value: { postMessage: postMessageMock }, configurable: true });
+    const mockUser = { name: 'Test User', email: 'test@example.com', role: 'DOCENTE' };
     const mockToken = 'real_token_123';
-    const mockRawData = { dummy: 'data' };
-    const mockAdaptedData = { user: mockUser, accessToken: mockToken, expiresIn: 3600, tokenType: 'Bearer' };
-    
+    const mockAdaptedData = { user: mockUser, accessToken: mockToken, expiresIn: 900, tokenType: 'Bearer' };
+
     sessionModule.getLoginValidationError.mockReturnValue('');
-    shellModule.loginWithApi.mockResolvedValueOnce(mockRawData);
+    shellModule.loginWithApi.mockResolvedValueOnce({ token: mockToken });
     sessionModule.adaptSessionFromApi.mockReturnValue(mockAdaptedData);
-    
+
     render(<Login />);
-    
-    // Fill out form
+
     fireEvent.change(screen.getByPlaceholderText('maria.lopez@email.com'), {
       target: { value: 'test@example.com' }
     });
     fireEvent.change(screen.getByPlaceholderText('••••••••••••'), {
       target: { value: 'password123' }
     });
-    
-    // Submit
     fireEvent.click(screen.getByText('Ingresar a EduTrack'));
-    
-    // Assertions
+
     await waitFor(() => {
-      expect(shellModule.loginWithApi).toHaveBeenCalledWith(
-        'test@example.com',
-        'password123',
-        expect.any(String)
+      expect(postMessageMock).toHaveBeenCalledWith(
+        {
+          type: 'edutrack:session',
+          session: {
+            accessToken: mockToken,
+            tokenType: 'Bearer',
+            expiresIn: 900,
+            user: mockUser
+          }
+        },
+        'http://localhost:3000'
       );
     });
-    
-    expect(shellModule.setSession).toHaveBeenCalledWith(mockToken, mockUser, 3600, 'Bearer');
-    expect(window.location.href).toContain('http://localhost:3000');
+    expect(replaceMock).not.toHaveBeenCalled();
+    expect(window.location.href).toBe('');
   });
 
-  test('shows error message in DOM on failed login', async () => {
+  test('redirects to shell origin without URL token hash when opened standalone', async () => {
+    const mockUser = { name: 'Test User', email: 'test@example.com', role: 'ACUDIENTE' };
+    const mockAdaptedData = { user: mockUser, accessToken: 'real_token_123', expiresIn: 900, tokenType: 'Bearer' };
+
+    sessionModule.getLoginValidationError.mockReturnValue('');
+    shellModule.loginWithApi.mockResolvedValueOnce({ dummy: 'data' });
+    sessionModule.adaptSessionFromApi.mockReturnValue(mockAdaptedData);
+
+    render(<Login />);
+
+    fireEvent.change(screen.getByPlaceholderText('maria.lopez@email.com'), {
+      target: { value: 'test@example.com' }
+    });
+    fireEvent.change(screen.getByPlaceholderText('••••••••••••'), {
+      target: { value: 'password123' }
+    });
+    fireEvent.click(screen.getByText('Ingresar a EduTrack'));
+
+    await waitFor(() => {
+      expect(replaceMock).toHaveBeenCalledWith('http://localhost:3000');
+    });
+    expect(screen.queryByText(/Demo/i)).not.toBeInTheDocument();
+  });
+
+  test('shows error message in DOM on failed login without demo bypass button', async () => {
     sessionModule.getLoginValidationError.mockReturnValue('');
     shellModule.loginWithApi.mockRejectedValueOnce(new Error('Auth failed'));
 
@@ -87,8 +119,7 @@ describe('Login Component', () => {
     await waitFor(() => {
       expect(screen.getByText('Auth failed')).toBeInTheDocument();
     });
-
-    expect(shellModule.setSession).not.toHaveBeenCalled();
+    expect(screen.queryByText(/demostración/i)).not.toBeInTheDocument();
   });
 
   test('shows error message when gateway or redirect URL is missing', async () => {
