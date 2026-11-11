@@ -94,9 +94,9 @@ export default function Login() {
 
         <div style={{ maxWidth: '420px', width: '100%', margin: '28px auto' }}>
           <div className="et-role-tabs" role="tablist" aria-label="Perfil de acceso">
-            <button type="button" role="tab" aria-selected={activeRole === 'family'} className={`et-role-tab ${activeRole === 'family' ? 'active' : ''}`} onClick={() => setActiveRole('family')}>Familias</button>
-            <button type="button" role="tab" aria-selected={activeRole === 'teacher'} className={`et-role-tab ${activeRole === 'teacher' ? 'active' : ''}`} onClick={() => setActiveRole('teacher')}>Docentes</button>
-            <button type="button" role="tab" aria-selected={activeRole === 'admin'} className={`et-role-tab ${activeRole === 'admin' ? 'active' : ''}`} onClick={() => setActiveRole('admin')}>Directivos</button>
+            <button type="button" role="tab" aria-selected={activeRole === 'family'} className={`et-role-tab ${activeRole === 'family' ? 'active' : ''}`} onClick={() => { setActiveRole('family'); setErrorMessage(''); }}>Familias</button>
+            <button type="button" role="tab" aria-selected={activeRole === 'teacher'} className={`et-role-tab ${activeRole === 'teacher' ? 'active' : ''}`} onClick={() => { setActiveRole('teacher'); setErrorMessage(''); }}>Docentes</button>
+            <button type="button" role="tab" aria-selected={activeRole === 'admin'} className={`et-role-tab ${activeRole === 'admin' ? 'active' : ''}`} onClick={() => { setActiveRole('admin'); setErrorMessage(''); }}>Directivos</button>
           </div>
 
           <h2 style={{ fontSize: '11px', color: '#0D9488', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 8px' }}>{roleInfo.tag}</h2>
@@ -124,7 +124,9 @@ export default function Login() {
                 <span>{errorMessage}</span>
               </div>
             )}
-            <button type="submit" disabled={isSubmitting} className="et-submit-btn">Ingresar a EduTrack</button>
+            <button type="submit" disabled={isSubmitting} aria-busy={isSubmitting} className="et-submit-btn">
+              {isSubmitting ? 'Verificando credenciales…' : 'Ingresar a EduTrack'}
+            </button>
           </form>
         </div>
 
