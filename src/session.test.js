@@ -38,6 +38,25 @@ test('adapts the documented API response without mutating it', () => {
   expect(session.user).not.toBe(raw.user);
 });
 
-test('rejects an incomplete identity API response', () => {
+test('adapts the identity API flat response and maps backend roles', () => {
+  const raw = {
+    token: 'rs256.jwt.token',
+    tokenType: 'Bearer',
+    expiresIn: 900,
+    userId: '11111111-1111-1111-1111-111111111111',
+    email: 'maria.lopez@edutrack.edu.co',
+    fullName: 'María López',
+    role: 'PARENT',
+    schoolId: '00000000-0000-4000-8000-000000000001'
+  };
+  const session = adaptSessionFromApi(raw);
+  expect(session.accessToken).toBe('rs256.jwt.token');
+  expect(session.user.role).toBe('ACUDIENTE');
+  expect(session.user.name).toBe('María López');
+  expect(session.expiresIn).toBe(900);
+});
+
+test('rejects unmapped roles such as STUDENT or empty responses', () => {
+  expect(() => adaptSessionFromApi({ token: 't', role: 'STUDENT' })).toThrow(/Invalid identity API response/);
   expect(() => adaptSessionFromApi({ accessToken: '', user: null })).toThrow(/Invalid identity API response/);
 });
