@@ -18,11 +18,6 @@ export default defineConfig(({ mode }) => {
     },
     preview: {
       headers: securityHeaders
-    },
-    build: {
-      rollupOptions: {
-        external: ['educk-front']
-      }
     }
   };
 });
